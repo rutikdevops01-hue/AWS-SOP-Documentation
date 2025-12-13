@@ -56,5 +56,63 @@ WINDOWS KEY PAIR:
 2. Convert PEM to PPK using PuTTYgen
 
 ====================================
-END OF FILE
+KEY USAGE & BACKEND WORKING
+====================================
 
+IMPORTANT RULE:
+The key used depends on the TARGET SERVER OS, not the client OS.
+
+------------------------------------
+LINUX SERVER (SSH ACCESS)
+------------------------------------
+- Key used: PEM (.pem)
+- Protocol: SSH
+- Backend working:
+  1. AWS stores public key on the instance in ~/.ssh/authorized_keys
+  2. Client uses private key (.pem) to authenticate
+  3. SSH matches private key with public key
+  4. If matched, access is granted
+
+Examples:
+- Linux → Linux: PEM key
+- Windows → Linux: PEM or converted PPK key
+- macOS → Linux: PEM key
+
+------------------------------------
+WINDOWS SERVER (RDP ACCESS)
+------------------------------------
+- Key used: PEM (for password decryption)
+- Protocol: RDP
+- Backend working:
+  1. AWS encrypts Administrator password using public key
+  2. User decrypts password using private key
+  3. RDP login is done using decrypted password
+
+Examples:
+- Windows → Windows: PEM/PPK to decrypt password
+- Linux → Windows: PEM to decrypt password
+- macOS → Windows: PEM to decrypt password
+
+------------------------------------
+KEY USAGE MATRIX
+------------------------------------
+
+Client OS   →   Server OS   →   Key Used
+----------------------------------------
+Linux       →   Linux       →   PEM
+Windows     →   Linux       →   PEM / PPK
+macOS       →   Linux       →   PEM
+Windows     →   Windows     →   PEM (password decrypt)
+Linux       →   Windows     →   PEM (password decrypt)
+macOS       →   Windows     →   PEM (password decrypt)
+
+------------------------------------
+IMPORTANT NOTES
+------------------------------------
+- AWS never stores private keys
+- Private key can be downloaded only once
+- PPK is just a PuTTY-compatible format of PEM
+- Recommended best practice: Use AWS SSM Session Manager instead of key pairs
+
+====================================
+END OF FILE
